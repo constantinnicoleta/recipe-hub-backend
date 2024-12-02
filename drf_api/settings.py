@@ -37,7 +37,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = 'DEV' in os.environ
 
-ALLOWED_HOSTS = ['localhost','127.0.0.1','*.gitpod.io','recipe-hub-backend-project.herokuapp.com']
+ALLOWED_HOSTS = ['localhost','127.0.0.1','*.gitpod.io','https://recipe-hub-backend-project-3024dae0e274.herokuapp.com/']
 
 
 # Application definition
