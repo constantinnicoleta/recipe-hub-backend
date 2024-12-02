@@ -37,8 +37,8 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = 'DEV' in os.environ
 
-ALLOWED_HOSTS = ['localhost','127.0.0.1','*.gitpod.io','recipe-hub-backend-project-3024dae0e274.herokuapp.com']
-
+ALLOWED_HOSTS = ['localhost','127.0.0.1','*.gitpod.io','8000-constantinn-recipehubba-696ftlma688.ws-eu117.gitpod.io','recipe-hub-backend-project-3024dae0e274.herokuapp.com']
+ 
 
 # Application definition
 
@@ -59,6 +59,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -119,6 +120,11 @@ else:
          'default': dj_database_url.parse(os.environ.get("DATABASE_URL"))
      }
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://8000-constantinn-recipehubba-696ftlma688.ws-eu117.gitpod.io',
+    'https://*.gitpod.io',
+    'https://recipe-hub-backend-project-3024dae0e274.herokuapp.com',
+]
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -155,6 +161,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
