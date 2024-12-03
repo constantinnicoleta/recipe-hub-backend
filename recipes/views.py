@@ -1,12 +1,12 @@
 from django.shortcuts import render
+from rest_framework.decorators import api_view
 from rest_framework import generics, status
-from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.db.models import Count
-from .models import Recipe, Category, Comment, Like, Follow
+from .models import Recipe, Category, Comment, Like, Following
 from .serializers import (
     RecipeSerializer, CategorySerializer, CommentSerializer,
-    LikeSerializer, FollowSerializer
+    LikeSerializer, FollowingSerializer
 )
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from .permissions import IsOwnerOrReadOnly
@@ -20,7 +20,7 @@ class RecipeListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        serializer.save(author=self.request.user)
 
 
 # RecipeDetailView: Handles retrieving, updating, or deleting a single recipe by ID.
@@ -31,7 +31,7 @@ class RecipeDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
     def perform_update(self, serializer):
-        serializer.save(owner=self.request.user)
+        serializer.save(author=self.request.user)
 
 
 # CategoryListView: Handles listing all categories.
@@ -50,7 +50,7 @@ class CommentListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        serializer.save(author=self.request.user)
 
 
 # CommentDetailView: Handles retrieving, updating, or deleting a single comment by ID.
@@ -61,7 +61,7 @@ class CommentDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
     def perform_update(self, serializer):
-        serializer.save(owner=self.request.user)
+        serializer.save(author=self.request.user)
 
 
 # like_recipe: Function-based view for liking or unliking a recipe.
@@ -75,11 +75,11 @@ def like_recipe(request, recipe_id):
         return Response({'error': 'Recipe not found'}, status=status.HTTP_404_NOT_FOUND)
 
     user = request.user
-    if Like.objects.filter(owner=user, post=recipe).exists():
-        Like.objects.filter(owner=user, post=recipe).delete()
+    if Like.objects.filter(author=user, post=recipe).exists():
+        Like.objects.filter(author=user, post=recipe).delete()
         return Response({'message': 'Recipe unliked'}, status=status.HTTP_204_NO_CONTENT)
     else:
-        Like.objects.create(owner=user, post=recipe)
+        Like.objects.create(author=user, post=recipe)
         return Response({'message': 'Recipe liked'}, status=status.HTTP_201_CREATED)
 
 
@@ -93,9 +93,9 @@ def follow_user(request, user_id):
     except User.DoesNotExist:
         return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
-    if Follow.objects.filter(owner=request.user, followed=user_to_follow).exists():
-        Follow.objects.filter(owner=request.user, followed=user_to_follow).delete()
+    if Follow.objects.filter(author=request.user, followed=user_to_follow).exists():
+        Follow.objects.filter(author=request.user, followed=user_to_follow).delete()
         return Response({'message': 'Unfollowed user'}, status=status.HTTP_204_NO_CONTENT)
     else:
-        Follow.objects.create(owner=request.user, followed=user_to_follow)
+        Follow.objects.create(author=request.user, followed=user_to_follow)
         return Response({'message': 'Followed user'}, status=status.HTTP_201_CREATED)

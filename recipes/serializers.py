@@ -1,12 +1,12 @@
 from rest_framework import serializers
-from .models import Recipe, Category, Comment, Like, Follow
+from .models import Recipe, Category, Comment, Like, Following
 
 
 # RecipeSerializer: Handles Recipe model with owner details, ownership check,
 # image validation, and read-only fields for likes and comments count.
 class RecipeSerializer(serializers.ModelSerializer):
-    owner = serializers.ReadOnlyField(source='owner.username')
-    is_owner = serializers.SerializerMethodField()
+    author = serializers.ReadOnlyField(source='author.username')
+    is_author = serializers.SerializerMethodField()
     likes_count = serializers.ReadOnlyField()
     comments_count = serializers.ReadOnlyField()
 
@@ -17,15 +17,15 @@ class RecipeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Image dimensions exceed 4096x4096px!")
         return value
 
-    def get_is_owner(self, obj):
+    def get_is_author(self, obj):
         request = self.context.get('request')
-        return request.user == obj.owner
+        return request.user == obj.author
 
     class Meta:
         model = Recipe
         fields = [
-            'id', 'owner', 'title', 'content', 'image', 'created_at', 'updated_at',
-            'is_owner', 'likes_count', 'comments_count',
+            'id', 'author', 'title', 'description', 'ingredients', 'instructions', 'image',
+            'created_at', 'updated_at', 'is_author', 'likes_count', 'comments_count',
         ]
 
 
@@ -41,35 +41,35 @@ class CategorySerializer(serializers.ModelSerializer):
 # CommentSerializer: Handles Comment model with owner details, ownership check,
 # and association with posts.
 class CommentSerializer(serializers.ModelSerializer):
-    owner = serializers.ReadOnlyField(source='owner.username')
-    is_owner = serializers.SerializerMethodField()
+    author = serializers.ReadOnlyField(source='author.username')
+    is_author = serializers.SerializerMethodField()
 
-    def get_is_owner(self, obj):
+    def get_is_author(self, obj):
         request = self.context.get('request')
-        return request.user == obj.owner
+        return request.user == obj.author
 
     class Meta:
         model = Comment
         fields = [
-            'id', 'owner', 'post', 'content', 'created_at', 'updated_at', 'is_owner',
+            'id', 'author', 'post', 'content', 'created_at', 'updated_at', 'is_author',
         ]
 
 
 
 # LikeSerializer: Simplified serializer for Like model with owner and post details.
 class LikeSerializer(serializers.ModelSerializer):
-    owner = serializers.ReadOnlyField(source='owner.username')
+    author = serializers.ReadOnlyField(source='author.username')
 
     class Meta:
         model = Like
-        fields = ['id', 'owner', 'post', 'created_at']        
+        fields = ['id', 'author', 'post', 'created_at']        
 
 
 
-# FollowSerializer: Handles Follow model with owner details and validation for
+# FollowingSerializer: Handles Following model with owner details and validation for
 # unique relationships between followers and followed users.
-class FollowSerializer(serializers.ModelSerializer):
-    owner = serializers.ReadOnlyField(source='owner.username')
+class FollowingSerializer(serializers.ModelSerializer):
+    author = serializers.ReadOnlyField(source='author.username')
     followed_name = serializers.ReadOnlyField(source='followed.username')
 
     def create(self, validated_data):
@@ -79,5 +79,5 @@ class FollowSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({'detail': 'Possible duplicate follow'})
 
     class Meta:
-        model = Follow
-        fields = ['id', 'owner', 'followed', 'followed_name', 'created_at']
+        model = Following
+        fields = ['id', 'author', 'followed', 'followed_name', 'created_at']
