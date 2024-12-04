@@ -112,32 +112,35 @@ def follow_user(request, user_id):
         user_to_follow = User.objects.get(id=user_id)
     except User.DoesNotExist:
         return Response(
-             {'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+            {'error': 'User not found'}, 
+            status=status.HTTP_404_NOT_FOUND
+        )
 
+    follower = request.user
 
-follower = request.user
-
-if Following.objects.filter(
-    follower=follower,
-    following=user_to_follow
-).exists():
-    Following.objects.filter(
+    if Following.objects.filter(
         follower=follower,
         following=user_to_follow
-    ).delete()
-    return Response(
-        {'message': 'Unfollowed user'},
-        status=status.HTTP_204_NO_CONTENT
-    )
-else:
-    Following.objects.create(
-        follower=follower,
-        following=user_to_follow
-    )
-    return Response(
-        {'message': 'Followed user'},
-        status=status.HTTP_201_CREATED
-    )
+    ).exists():
+        # Unfollow the user if already followed
+        Following.objects.filter(
+            follower=follower,
+            following=user_to_follow
+        ).delete()
+        return Response(
+            {'message': 'Unfollowed user'}, 
+            status=status.HTTP_204_NO_CONTENT
+        )
+    else:
+        # Follow the user if not already followed
+        Following.objects.create(
+            follower=follower,
+            following=user_to_follow
+        )
+        return Response(
+            {'message': 'Followed user'}, 
+            status=status.HTTP_201_CREATED
+        )
 
 
 class CustomLoginView(APIView):
