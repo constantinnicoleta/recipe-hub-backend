@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from rest_framework.decorators import api_view
+from rest_framework.views import APIView
 from rest_framework import generics, status
 from rest_framework.response import Response
 from django.db.models import Count
@@ -8,8 +9,9 @@ from .serializers import (
     RecipeSerializer, CategorySerializer, CommentSerializer,
     LikeSerializer, FollowingSerializer
 )
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
 from .permissions import IsOwnerOrReadOnly
+from django.contrib.auth import authenticate, login, logout
 
 
 # RecipeListCreateView: Handles listing all recipes and creating a new recipe.
@@ -99,3 +101,55 @@ def follow_user(request, user_id):
     else:
         Follow.objects.create(author=request.user, followed=user_to_follow)
         return Response({'message': 'Followed user'}, status=status.HTTP_201_CREATED)
+
+
+#Custom login view to authenticate the user and notify on success/failure.
+class CustomLoginView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        username = request.data.get("username")
+        password = request.data.get("password")
+
+        # Authenticate the user
+        user = authenticate(request, username=username, password=password)
+        if user:
+            login(request, user)
+            return Response(
+                {"message": f"Welcome back, {user.username}!", "state": "logged_in"},
+                status=status.HTTP_200_OK,
+            )
+        return Response(
+            {"error": "Invalid credentials", "state": "logged_out"},
+            status=status.HTTP_401_UNAUTHORIZED,
+        )
+
+
+#Custom logout view to log out the user and notify on success.
+class CustomLogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        logout(request)
+        return Response(
+            {"message": "You have been logged out successfully!", "state": "logged_out"},
+            status=status.HTTP_200_OK,
+        )
+
+
+#View to check the user's current authentication state.
+class UserStatusView(APIView):
+    def get(self, request):
+        if request.user.is_authenticated:
+            return Response(
+                {
+                    "is_logged_in": True,
+                    "user": {
+                        "id": request.user.id,
+                        "username": request.user.username,
+                        "email": request.user.email,
+                    },
+                },
+                status=status.HTTP_200_OK,
+            )
+        return Response({"is_logged_in": False}, status=status.HTTP_200_OK)        
