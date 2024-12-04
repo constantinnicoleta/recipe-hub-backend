@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
@@ -10,7 +11,7 @@ from .serializers import (
     LikeSerializer, FollowingSerializer
 )
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
-from .permissions import IsOwnerOrReadOnly
+from .permissions import IsAuthorOrReadOnly
 from django.contrib.auth import authenticate, login, logout
 
 
@@ -30,7 +31,7 @@ class RecipeListCreateView(generics.ListCreateAPIView):
 class RecipeDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
 
     def perform_update(self, serializer):
         serializer.save(author=self.request.user)
@@ -60,7 +61,7 @@ class CommentListCreateView(generics.ListCreateAPIView):
 class CommentDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
 
     def perform_update(self, serializer):
         serializer.save(author=self.request.user)
@@ -77,11 +78,11 @@ def like_recipe(request, recipe_id):
         return Response({'error': 'Recipe not found'}, status=status.HTTP_404_NOT_FOUND)
 
     user = request.user
-    if Like.objects.filter(author=user, post=recipe).exists():
-        Like.objects.filter(author=user, post=recipe).delete()
+    if Like.objects.filter(user=user, recipe=recipe).exists():
+        Like.objects.filter(user=user, recipe=recipe).delete()
         return Response({'message': 'Recipe unliked'}, status=status.HTTP_204_NO_CONTENT)
     else:
-        Like.objects.create(author=user, post=recipe)
+        Like.objects.create(user=user, recipe=recipe)
         return Response({'message': 'Recipe liked'}, status=status.HTTP_201_CREATED)
 
 
@@ -95,11 +96,13 @@ def follow_user(request, user_id):
     except User.DoesNotExist:
         return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
-    if Follow.objects.filter(author=request.user, followed=user_to_follow).exists():
-        Follow.objects.filter(author=request.user, followed=user_to_follow).delete()
+    follower = request.user    
+
+    if Following.objects.filter(follower=follower, following=user_to_follow).exists():
+        Following.objects.filter(follower=follower, following=user_to_follow).delete()
         return Response({'message': 'Unfollowed user'}, status=status.HTTP_204_NO_CONTENT)
     else:
-        Follow.objects.create(author=request.user, followed=user_to_follow)
+        Following.objects.create(follower=follower, following=user_to_follow)
         return Response({'message': 'Followed user'}, status=status.HTTP_201_CREATED)
 
 

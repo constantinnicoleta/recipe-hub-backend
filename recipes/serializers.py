@@ -39,7 +39,6 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
 
-
 # CommentSerializer: Handles Comment model with owner details, ownership check,
 # and association with posts.
 class CommentSerializer(serializers.ModelSerializer):
@@ -53,9 +52,8 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = [
-            'id', 'author', 'post', 'content', 'created_at', 'updated_at', 'is_author',
+            'id', 'author', 'recipe', 'content', 'created_at', 'is_author',
         ]
-
 
 
 # LikeSerializer: Simplified serializer for Like model with owner and post details.
@@ -65,7 +63,6 @@ class LikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Like
         fields = ['id', 'author', 'post', 'created_at']        
-
 
 
 # FollowingSerializer: Handles Following model with owner details and validation for
