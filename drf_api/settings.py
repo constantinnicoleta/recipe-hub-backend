@@ -54,7 +54,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = 'DEV' in os.environ
 
-ALLOWED_HOSTS = ['localhost','127.0.0.1','*.gitpod.io','8000-constantinn-recipehubba-696ftlma688.ws-eu117.gitpod.io','recipe-hub-backend-project-3024dae0e274.herokuapp.com']
+ALLOWED_HOSTS = ['localhost','127.0.0.1','*.gitpod.io','8000-constantinn-recipehubba-b2c3b8hspg2.ws-eu117.gitpod.io','recipe-hub-backend-project-3024dae0e274.herokuapp.com']
  
 
 # Application definition
@@ -144,7 +144,7 @@ else:
      }
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://8000-constantinn-recipehubba-696ftlma688.ws-eu117.gitpod.io',
+    'https://8000-constantinn-recipehubba-b2c3b8hspg2.ws-eu117.gitpod.io/',
     'https://*.gitpod.io',
     'https://recipe-hub-backend-project-3024dae0e274.herokuapp.com',
 ]
