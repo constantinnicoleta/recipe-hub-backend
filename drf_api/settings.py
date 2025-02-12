@@ -38,6 +38,7 @@ REST_USE_JWT = True
 JWT_AUTH_SECURE = True
 JWT_AUTH_COOKIE = 'my-app-auth'
 JWT_AUTH_REFRESH_COOKIE = 'my-refresh-token'
+JWT_AUTH_SAMESITE = 'None'
 
 # Disable email verification
 ACCOUNT_EMAIL_VERIFICATION = "none"
@@ -54,8 +55,13 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = 'DEV' in os.environ
 
-ALLOWED_HOSTS = ['localhost','127.0.0.1','*.gitpod.io','8000-constantinn-recipehubba-b2c3b8hspg2.ws-eu117.gitpod.io','recipe-hub-backend-project-3024dae0e274.herokuapp.com']
- 
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '*.gitpod.io',
+    '8000-constantinn-recipehubba-b2c3b8hspg2.ws-eu117.gitpod.io',
+    'recipe-hub-backend-project-3024dae0e274.herokuapp.com'
+]
 
 # Application definition
 
@@ -84,28 +90,39 @@ SITE_ID = 1
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'allauth.account.middleware.AccountMiddleware',
-    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# CORS settings
+
+CORS_ALLOW_CREDENTIALS = True 
+
 if 'CLIENT_ORIGIN' in os.environ:
-     CORS_ALLOWED_ORIGINS = [
-         os.environ.get('CLIENT_ORIGIN')
-     ]
+    CORS_ALLOWED_ORIGINS = [
+        os.environ.get('CLIENT_ORIGIN'),
+        'http://localhost:3000',
+        "http://192.168.1.149:3000",
+        "https://recipe-hub-frontend-project-4896188af146.herokuapp.com",
+    ]
 else:
-     CORS_ALLOWED_ORIGIN_REGEXES = [
-         r"^https:\/\/.*\.codeinstitute-ide\.net$",
+    CORS_ALLOWED_ORIGIN_REGEXES = [
+        r"^https:\/\/.*\.codeinstitute-ide\.net$",
     ]
 
-CORS_ALLOW_CREDENTIALS = True
-JWT_AUTH_SAMESITE = 'None'
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "http://192.168.1.149:3000",
+    "https://recipe-hub-frontend-project-4896188af146.herokuapp.com",
+    "https://recipe-hub-backend-project-3024dae0e274.herokuapp.com",
+]
 
 ROOT_URLCONF = 'drf_api.urls'
 
@@ -143,12 +160,6 @@ else:
          'default': dj_database_url.parse(os.environ.get("DATABASE_URL"))
      }
 
-CSRF_TRUSTED_ORIGINS = [
-    'https://8000-constantinn-recipehubba-b2c3b8hspg2.ws-eu117.gitpod.io/',
-    'https://*.gitpod.io',
-    'https://recipe-hub-backend-project-3024dae0e274.herokuapp.com',
-]
-
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
@@ -167,7 +178,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
@@ -178,7 +188,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
