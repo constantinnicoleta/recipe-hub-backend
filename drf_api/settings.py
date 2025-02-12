@@ -112,10 +112,10 @@ if 'CLIENT_ORIGIN' in os.environ:
         "http://192.168.1.149:3000",
         "https://recipe-hub-frontend-project-4896188af146.herokuapp.com",
     ]
-else:
-    CORS_ALLOWED_ORIGIN_REGEXES = [
-        r"^https:\/\/.*\.codeinstitute-ide\.net$",
-    ]
+
+CORS_ALLOWED_ORIGIN = [
+    "http://localhost:3000",
+]
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
