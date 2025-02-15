@@ -13,7 +13,4 @@ urlpatterns = [
     path('comments/<int:pk>/', CommentDetailView.as_view(), name='comment-detail'),
     path('recipes/<int:recipe_id>/like/', like_recipe, name='like-recipe'),
     path('users/<int:user_id>/follow/', follow_user, name='follow-user'),
-    path('custom-login/', CustomLoginView.as_view(), name='custom-login'),
-    path('custom-logout/', CustomLogoutView.as_view(), name='custom-logout'),
-    path('user-status/', UserStatusView.as_view(), name='user-status'),
 ]
