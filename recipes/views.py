@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
-from rest_framework import generics, status
+from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from django.db.models import Count
 from .models import Recipe, Category, Comment, Like, Following
@@ -22,9 +22,21 @@ class RecipeListCreateView(generics.ListCreateAPIView):
     List all recipes or create a new one.
     Authenticated users can create; all users can view.
     """
-    queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        """
+        If an `author` parameter is provided, filter recipes by author.
+        Otherwise, return all recipes.
+        """
+        queryset = Recipe.objects.all()
+        author = self.request.query_params.get('author')
+
+        if author:
+            queryset = queryset.filter(author__username=author)
+
+        return queryset
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -37,7 +49,16 @@ class RecipeDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
+
+    def get_serializer_context(self):
+        """
+        Ensures `request` is passed into the serializer,
+        so `is_author` is correctly calculated in the response.
+        """
+        context = super().get_serializer_context()
+        context["request"] = self.request
+        return context
 
     def perform_update(self, serializer):
         serializer.save(author=self.request.user)
