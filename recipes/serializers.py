@@ -14,7 +14,6 @@ class RecipeSerializer(serializers.ModelSerializer):
     comments_count = serializers.ReadOnlyField()
 
     def validate_image(self, value):
-        # Validates that the image size is below 2MB
         if not value:
             return value
         if value.size > 2 * 1024 * 1024:

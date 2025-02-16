@@ -199,15 +199,12 @@ class UserStatusView(APIView):
     """
     def get(self, request):
         if request.user.is_authenticated:
-            return Response(
-                {
-                    "is_logged_in": True,
-                    "user": {
-                        "id": request.user.id,
-                        "username": request.user.username,
-                        "email": request.user.email,
-                    },
+            return Response({
+                "is_logged_in": True,
+                "user": {
+                    "id": request.user.id,
+                    "username": request.user.username,
+                    "email": request.user.email
                 },
-                status=status.HTTP_200_OK,
-            )
-        return Response({"is_logged_in": False}, status=status.HTTP_200_OK)
+            }, status=200)
+        return Response({"is_logged_in": False}, status=200)
