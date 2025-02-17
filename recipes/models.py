@@ -1,8 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
 class Recipe(models.Model):
-    """ Represents a user-created recipe with a title, description, 
+    """ Represents a user-created recipe with a title, description,
     ingredients, instructions, category, and timestamps. """
     title = models.CharField(max_length=255)
     description = models.TextField()
@@ -13,6 +14,7 @@ class Recipe(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+
 class Category(models.Model):
     """ Defines categories for organizing recipes. """
     name = models.CharField(max_length=50)
@@ -20,6 +22,7 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class Following(models.Model):
     """ Establishes a follower-following relationship between users. """

@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User 
+from django.contrib.auth.models import User
 from rest_framework import serializers
 from .models import Recipe, Category, Following
 
@@ -11,6 +11,7 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ['id', 'name']
+
 
 class RecipeSerializer(serializers.ModelSerializer):
     """
@@ -26,16 +27,15 @@ class RecipeSerializer(serializers.ModelSerializer):
     def get_is_author(self, obj):
         request = self.context.get('request')
         return request.user == obj.author if request else False
-    
 
-    class Meta:
-        model = Recipe
-        fields = [
+
+class Meta:
+    model = Recipe
+    fields = [
             'id', 'author', 'title', 'description', 'ingredients',
             'instructions', 'category', 'created_at', 'updated_at',
             'is_author', 'category_name',
         ]
-
 
 
 class FollowingSerializer(serializers.ModelSerializer):
@@ -51,7 +51,8 @@ class FollowingSerializer(serializers.ModelSerializer):
         # Handles unique constraints for the follower-followed relationship
         try:
             return super().create(validated_data)
-        except IntegrityError:
+
+        except IntegrityError:          
             raise serializers.ValidationError(
                 {'detail': 'Possible duplicate follow'})
 
@@ -72,4 +73,4 @@ class FeedSerializer(serializers.Serializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "username"]    
+        fields = ["id", "username"]

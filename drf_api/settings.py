@@ -38,7 +38,7 @@ REST_FRAMEWORK = {
 # CSRF Settings
 CSRF_COOKIE_NAME = "csrftoken"
 CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True 
+SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SAMESITE = "Strict"
 
@@ -135,31 +135,27 @@ WSGI_APPLICATION = 'drf_api.wsgi.application'
 
 # Database Configuration
 if 'DEV' in os.environ:
-     DATABASES = {
+    DATABASES = {
          'default': {
              'ENGINE': 'django.db.backends.sqlite3',
              'NAME': BASE_DIR / 'db.sqlite3',
          }
      }
 else:
-     DATABASES = {
+    DATABASES = {
          'default': dj_database_url.parse(os.environ.get("DATABASE_URL"))
      }
 
 # Password Validation
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME':
+     'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME':
+     'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME':
+     'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME':
+     'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
 

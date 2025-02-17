@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (
     RecipeListCreateView, RecipeDetailView, CategoryListView,
-    CategoryDetailView, 
+    CategoryDetailView,
     FeedView, follow_user, UserListView, check_follow_status,
 )
 
