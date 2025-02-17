@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User 
 from rest_framework import serializers
-from .models import Recipe, Category, Comment, Like, Following
+from .models import Recipe, Category, Following
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -20,56 +20,22 @@ class RecipeSerializer(serializers.ModelSerializer):
     """
     author = serializers.ReadOnlyField(source='author.username')
     is_author = serializers.SerializerMethodField()
-    likes_count = serializers.ReadOnlyField()
-    comments_count = serializers.ReadOnlyField()
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), write_only=True)
-    category_name = serializers.ReadOnlyField(source="category.name") 
+    category_name = serializers.ReadOnlyField(source="category.name")
 
     def get_is_author(self, obj):
         request = self.context.get('request')
-        return request.user == obj.author
+        return request.user == obj.author if request else False
+    
 
     class Meta:
         model = Recipe
         fields = [
             'id', 'author', 'title', 'description', 'ingredients',
             'instructions', 'category', 'created_at', 'updated_at',
-            'is_author', 'likes_count','category_name', 'comments_count',
+            'is_author', 'category_name',
         ]
 
-
-
-class CommentSerializer(serializers.ModelSerializer):
-    """
-    Serializer for the Comment model.
-    Handles author details, ownership checks, and associations with recipes.
-    """
-    author = serializers.ReadOnlyField(source='author.username')
-    is_author = serializers.SerializerMethodField()
-
-    def get_is_author(self, obj):
-        # Checks if the current user is the author of the comment
-        request = self.context.get('request')
-        return request.user == obj.author
-
-    class Meta:
-        model = Comment
-        fields = [
-            'id', 'author', 'recipe', 'content', 'created_at', 'is_author',
-        ]
-
-
-class LikeSerializer(serializers.ModelSerializer):
-    """
-    Serializer for the Like model.
-    Provides details about the user who liked a recipe
-    and the associated recipe.
-    """
-    author = serializers.ReadOnlyField(source='author.username')
-
-    class Meta:
-        model = Like
-        fields = ['id', 'author', 'post', 'created_at']
 
 
 class FollowingSerializer(serializers.ModelSerializer):

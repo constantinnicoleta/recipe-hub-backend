@@ -1,131 +1,217 @@
-![CI logo](https://codeinstitute.s3.amazonaws.com/fullstack/ci_logo_small.png)
+## Recipe Hub -Backend ##
 
-Welcome Nicoleta Constantin,
 
-This is the Code Institute student template for Gitpod. We have preinstalled all of the tools you need to get started. It's perfectly ok to use this template as the basis for your project submissions.
+The API will serve as the backend for a React-based frontend. Endpoints have been designed to enable efficient communication between the frontend and backend, including:
+- RESTful API endpoints for CRUD operations.
+- JWT-based authentication to protect resources and maintain user sessions.
 
-You can safely delete this README.md file or change it for your own project. Please do read it at least once, though! It contains some important information about Gitpod and the extensions we use. Some of this information has been updated since the video content was created. The last update to this file was: **June 18, 2024**
+Live API Endpoint
 
-## Gitpod Reminders
+Click here to view the deployed API 
 
-To run a frontend (HTML, CSS, Javascript only) application in Gitpod, in the terminal, type:
+# Planning Overview #
 
-`python3 -m http.server`
+## Backend Goals ##
 
-A blue button should appear to click: _Make Public_,
+- Secure API: Provide robust authentication and data protection.
 
-Another blue button should appear to click: _Open Browser_.
+- Efficient Data Management: Use Django ORM and PostgreSQL for structured storage.
 
-To run a backend Python file, type `python3 app.py` if your Python file is named `app.py`, of course.
+- Scalable API Endpoints: Allow seamless interactions between frontend and backend.
 
-A blue button should appear to click: _Make Public_,
+- Agile Methodology & GitHub Project Management via a Kanban Board to manage project progress effectively.
 
-Another blue button should appear to click: _Open Browser_.
 
-By Default, Gitpod gives you superuser security privileges. Therefore, you do not need to use the `sudo` (superuser do) command in the bash terminal in any of the lessons.
+# Core Functionalities #
 
-To log into the Heroku toolbelt CLI:
+## User Authentication ##
+Secure login and registration using JWT.
 
-1. Log in to your Heroku account and go to *Account Settings* in the menu under your avatar.
-2. Scroll down to the *API Key* and click *Reveal*
-3. Copy the key
-4. In Gitpod, from the terminal, run `heroku_config`
-5. Paste in your API key when asked
+## Recipe Management ##
+CRUD functionality for recipes.
 
-You can now use the `heroku` CLI program - try running `heroku apps` to confirm it works. This API key is unique and private to you, so do not share it. If you accidentally make it public, you can create a new one with _Regenerate API Key_.
+## User Engagement ##
+Implement feed and follows.
 
-### Connecting your Mongo database
+## Category-Based Organization ## 
+Enable recipe filtering by categories.
 
-- **Connect to Mongo CLI on a IDE**
-- navigate to your MongoDB Clusters Sandbox
-- click **"Connect"** button
-- select **"Connect with the MongoDB shell"**
-- select **"I have the mongo shell installed"**
-- choose **mongosh (2.0 or later)** for : **"Select your mongo shell version"**
-- choose option: **"Run your connection string in your command line"**
-- in the terminal, paste the copied code `mongo "mongodb+srv://<CLUSTER-NAME>.mongodb.net/<DBname>" --apiVersion 1 --username <USERNAME>`
-  - replace all `<angle-bracket>` keys with your own data
-- enter password _(will not echo **\*\*\*\*** on screen)_
+## Database Design ##
 
-------
+### Key Models ###
 
-## Release History
+### User ###
+Handles authentication and stores user profile details.
 
-We continually tweak and adjust this template to help give you the best experience. Here is the version history:
+### Recipe ### 
+Stores user-created recipes with title, description, ingredients, category.
 
-**June 18, 2024,** Add Mongo back into template
+### Category ###
+Organizes recipes into specific groups.
 
-**June 14, 2024,** Temporarily remove Mongo until the key issue is resolved
 
-**May 28 2024:** Fix Mongo and Links installs
+### Follow ###
+Manages relationships between users following each other.
 
-**April 26 2024:** Update node version to 16
+# API Documentation #
 
-**September 20 2023:** Update Python version to 3.9.17.
+## Authentication & Security ##
 
-**September 1 2021:** Remove `PGHOSTADDR` environment variable.
+- Uses JWT Authentication: Secure access using token-based authentication.
 
-**July 19 2021:** Remove `font_fix` script now that the terminal font issue is fixed.
+- Protected Endpoints: Only authenticated users can create, edit, or delete recipes.
 
-**July 2 2021:** Remove extensions that are not available in Open VSX.
+# API Endpoints #
 
-**June 30 2021:** Combined the P4 and P5 templates into one file, added the uptime script. See the FAQ at the end of this file.
+## Authentication ##
 
-**June 10 2021:** Added: `font_fix` script and alias to fix the Terminal font issue
+- POST /api/auth/register/ → User registration
 
-**May 10 2021:** Added `heroku_config` script to allow Heroku API key to be stored as an environment variable.
+- POST /api/auth/login/ → User login
 
-**April 7 2021:** Upgraded the template for VS Code instead of Theia.
+- POST /api/auth/logout/ → User logout
 
-**October 21 2020:** Versions of the HTMLHint, Prettier, Bootstrap4 CDN and Auto Close extensions updated. The Python extension needs to stay the same version for now.
+## Recipes ##
 
-**October 08 2020:** Additional large Gitpod files (`core.mongo*` and `core.python*`) are now hidden in the Explorer, and have been added to the `.gitignore` by default.
+- GET /api/recipes/ → Get all recipes
 
-**September 22 2020:** Gitpod occasionally creates large `core.Microsoft` files. These are now hidden in the Explorer. A `.gitignore` file has been created to make sure these files will not be committed, along with other common files.
+- POST /api/recipes/ → Create a new recipe
 
-**April 16 2020:** The template now automatically installs MySQL instead of relying on the Gitpod MySQL image. The message about a Python linter not being installed has been dealt with, and the set-up files are now hidden in the Gitpod file explorer.
+- GET /api/recipes/:id/ → Get details of a recipe
 
-**April 13 2020:** Added the _Prettier_ code beautifier extension instead of the code formatter built-in to Gitpod.
+- PUT /api/recipes/:id/ → Update a recipe
 
-**February 2020:** The initialisation files now _do not_ auto-delete. They will remain in your project. You can safely ignore them. They just make sure that your workspace is configured correctly each time you open it. It will also prevent the Gitpod configuration popup from appearing.
+- DELETE /api/recipes/:id/ → Delete a recipe
 
-**December 2019:** Added Eventyret's Bootstrap 4 extension. Type `!bscdn` in a HTML file to add the Bootstrap boilerplate. Check out the <a href="https://github.com/Eventyret/vscode-bcdn" target="_blank">README.md file at the official repo</a> for more options.
+## Categories ##
 
-------
+- GET /api/categories/ → Get all categories
 
-## FAQ about the uptime script
+-GET /api/categories/:id/ → Get recipes under a category
 
-**Why have you added this script?**
+## Follows ##
 
-It will help us to calculate how many running workspaces there are at any one time, which greatly helps us with cost and capacity planning. It will help us decide on the future direction of our cloud-based IDE strategy.
+POST /api/users/:id/follow/ → Follow a user
 
-**How will this affect me?**
 
-For everyday usage of Gitpod, it doesn’t have any effect at all. The script only captures the following data:
+# Manual Testing #
 
-- An ID that is randomly generated each time the workspace is started.
-- The current date and time
-- The workspace status of “started” or “running”, which is sent every 5 minutes.
+Manual Testing
 
-It is not possible for us or anyone else to trace the random ID back to an individual, and no personal data is being captured. It will not slow down the workspace or affect your work.
+1. - Create Recipe - Test Description: Submit a recipe with valid data, including a title, ingredients, and preparation steps.
 
-**So….?**
+Expected Outcome: The recipe is successfully created and returned in the response with a unique ID and associated user.
 
-We want to tell you this so that we are being completely transparent about the data we collect and what we do with it.
+2. - Follow a User - Test Description: Send a request to follow another user.
 
-**Can I opt out?**
+Expected Outcome: The user is successfully followed, and the follower count updates.
 
-Yes, you can. Since no personally identifiable information is being captured, we'd appreciate it if you let the script run; however if you are unhappy with the idea, simply run the following commands from the terminal window after creating the workspace, and this will remove the uptime script:
+3. - Login- Test Description: Provide valid credentials to the login endpoint.
 
-```
-pkill uptime.sh
-rm .vscode/uptime.sh
-```
+Expected Outcome: The user is authenticated and receives a JWT token.
 
-**Anything more?**
+4. - Access Unauthorized Endpoint -Test Description: Attempt to access a protected endpoint without providing a valid JWT token.
 
-Yes! We'd strongly encourage you to look at the source code of the `uptime.sh` file so that you know what it's doing. As future software developers, it will be great practice to see how these shell scripts work.
+Expected Outcome: The request is denied with a 401 Unauthorized error message.
 
----
 
-Happy coding!
+5. - nvalid Data Submission- Test Description: Attempt to submit a request with missing required fields or incorrect data types (e.g., submitting a recipe without a title).
+Expected Outcome: The system returns an appropriate validation error message indicating the missing or incorrect fields.
+
+6. Logout- Test Description: Send a request to the logout endpoint while being authenticated.
+Expected Outcome: The user session is invalidated, and the token is no longer usable for authentication.
+
+7. - Edit Recipe- Test Description: Update an existing recipe by modifying its title or ingredients.
+Expected Outcome: The recipe is successfully updated, and the new data is reflected in the response.
+
+8. - Delete Recipe- Test Description: Send a request to delete an existing recipe.
+
+Expected Outcome: The recipe is removed from the database and is no longer accessible.
+
+9. - Browse Recipes Without Login- Test Description: Try accessing the list of recipes without authentication.
+Expected Outcome: Recipes are visible, but actions like creating, editing, or deleting recipes are restricted to authenticated users.
+
+10. - Access Admin-Only Features- Test Description: Attempt to create, update, or delete a category as a non-admin user.
+Expected Outcome: The request is denied with a 403 Forbidden error.
+
+# Security Measures # 
+
+### Authentication ###
+
+JWT-based authentication ensures secure API access.
+Passwords are hashed and managed using Django's auth framework.
+
+### CSRF Protection ####
+
+Django's built-in CSRF middleware is enabled to prevent cross-site request forgery.
+Environment Variables
+
+Sensitive information like SECRET_KEY and DATABASE_URL is stored securely in environment variables.
+
+### Allowed Hosts ###
+
+Configured to allow only specific domains (e.g., *.herokuapp.com).
+
+
+# Technologies Used #
+
+### Django REST Framework ###
+ For building the API.
+
+### PostgreSQL ### 
+ For database management.
+
+### JWT Authentication ###
+ For secure login sessions.
+
+### Cloudinary ####
+ For storing recipe images.
+
+### Backend Deployment ###
+ via (Heroku)
+
+**Heroku App Setup**
+
+  - Register & Log In with heroku
+  - Navigate to `New > Create New App`
+  - Select Name of the app that is unique
+  - Select your region, and click "Create App.
+  - Navigate to `Settings > Reveal Config Vars`
+  - Add all variables from `env.py` to ConfigVars of Heroku App (your PostgreSQL database URL & Secret Key)
+  - Add the Heroku app URL into `ALLOWED HOSTS` in `settings.py`
+  - In root create file name `Procfile`
+  - Navigate to `Deploy > GitHub > Connect`
+  - Navigate to `Deploy > Deploy Branch`
+  - Optionally, you can enable automatic deploys
+  - See the deployment log - if the deployment was successful, you will be prompted with option to see live page 
+
+### the env.py file
+With the database created, certain variables need to be kept private and should not be published to GitHub.
+
+In order to keep these variables hidden, it is important to create an env.py file and add it to .gitignore.
+At the top import os and set the DATABASE_URL variable using the os.environ method. Add the URL copied from instance created above to it, like so: `os.environ[“DATABASE_URL”] = ”copiedURL”`
+The Django application requires a SECRET_KEY to encrypt session cookies. Set this variable to any string you like or generate a secret key on this MiniWebTool. `os.environ[“SECRET_KEY”] = ”longSecretString”`
+
+## Forking and Cloning the GitHub Repository
+
+1. Fork the GitHub Repository
+
+Steps:
+- Locate the GitHub repository.
+- Click on 'Fork', in the top right-hand corner.
+This will take you to your own repository to a fork with the same name as the original branch.
+
+2. Creating a Local Clone
+
+Steps:
+- Go to the GitHub repository.
+Click on 'Code' to the right of the screen. This will open a dropdown. Click on HTTPs and copy the link.
+- Open Git Bash in your IDE and change the current working directory to the location where you want the cloned directory.
+- Type git clone, paste the URL you copied earlier, and press Enter to create your local clone.
+
+## Credits ##
+
+Backend structure inspired by best practices in Django development.
+
+Live API: Click here (Update with actual link once deployed)
+
