@@ -37,9 +37,10 @@ REST_FRAMEWORK = {
 
 # CSRF Settings
 CSRF_COOKIE_NAME = "csrftoken"
-CSRF_COOKIE_SECURE = False  #  Set to True in production
-CSRF_COOKIE_HTTPONLY = True
-CSRF_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True 
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SAMESITE = "Strict"
 
 
 ACCOUNT_AUTHENTICATION_METHOD = "username"
@@ -53,12 +54,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = 'DEV' in os.environ
 
 ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    '*.gitpod.io',
-    '8000-constantinn-recipehubba-b2c3b8hspg2.ws-eu117.gitpod.io',
     'recipe-hub-backend-project-3024dae0e274.herokuapp.com',
-    'testserver',
 ]
 
 # Installed Apps
@@ -101,15 +97,11 @@ MIDDLEWARE = [
 # CORS Settings
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://192.168.1.149:3000",
     "https://recipe-hub-frontend-project-4896188af146.herokuapp.com",
 ]
 
 # CSRF Trusted Origins
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
-    "http://192.168.1.149:3000",
     "https://recipe-hub-frontend-project-4896188af146.herokuapp.com",
     "https://recipe-hub-backend-project-3024dae0e274.herokuapp.com",
 ]

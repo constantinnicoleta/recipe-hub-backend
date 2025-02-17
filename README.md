@@ -5,7 +5,7 @@ The API will serve as the backend for a React-based frontend. Endpoints have bee
 - RESTful API endpoints for CRUD operations.
 - JWT-based authentication to protect resources and maintain user sessions.
 
-Live API Endpoint
+Live API-  [Clickhere](https://recipe-hub-backend-project-3024dae0e274.herokuapp.com/)
 
 Click here to view the deployed API 
 
@@ -213,5 +213,5 @@ Click on 'Code' to the right of the screen. This will open a dropdown. Click on 
 
 Backend structure inspired by best practices in Django development.
 
-Live API: Click here (Update with actual link once deployed)
+Live API-  [Clickhere](https://recipe-hub-backend-project-3024dae0e274.herokuapp.com/)
 
