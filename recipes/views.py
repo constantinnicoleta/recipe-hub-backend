@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User
+from rest_framework.generics import ListAPIView
 from django.shortcuts import render
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework import generics, status, permissions
 from rest_framework.response import Response
@@ -8,7 +10,7 @@ from django.db.models import Count
 from .models import Recipe, Category, Comment, Like, Following
 from .serializers import (
     RecipeSerializer, CategorySerializer, CommentSerializer,
-    LikeSerializer, FollowingSerializer
+    LikeSerializer, FollowingSerializer, UserSerializer,
 )
 from rest_framework.permissions import (
     IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
@@ -27,19 +29,21 @@ class RecipeListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         """
-        If an `author` parameter is provided, filter recipes by author.
-        If a `category_name` parameter is provided, filter recipes by category name.
-        Otherwise, return all recipes.
+        Fetch either all recipes, recipes by author, or recipes filtered by category.
         """
-        queryset = Recipe.objects.select_related('category')  # Optimized query
+        queryset = Recipe.objects.select_related('category')
+        user = self.request.user
         author = self.request.query_params.get('author')
-        category_name = self.request.query_params.get('category_name')
+        category_id = self.request.query_params.get('category') 
 
         if author:
             queryset = queryset.filter(author__username=author)
 
-        if category_name:
-            queryset = queryset.filter(category__name=category_name)  # Filtering by category name
+        if category_id:
+            queryset = queryset.filter(category_id=category_id)
+
+        if "my_recipes" in self.request.path and user.is_authenticated:
+            return queryset.filter(author=user)
 
         return queryset
 
@@ -77,12 +81,16 @@ class RecipeDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 class CategoryListView(generics.ListAPIView):
     """
-    List all recipe categories.
-    Categories are read-only and visible to all users.
+    List all recipe categories, ensuring all users' recipes appear.
     """
-    queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.AllowAny]
+
+    def get_queryset(self):
+        """
+        Ensure all recipes appear in Categories, not just the logged-in user's.
+        """
+        return Category.objects.prefetch_related('recipes')
 
 
 class CategoryDetailView(generics.RetrieveAPIView):
@@ -120,6 +128,15 @@ class CommentDetailView(generics.RetrieveUpdateDestroyAPIView):
         serializer.save(author=self.request.user)
 
 
+class UserListView(ListAPIView):
+    """
+    Returns a list of all registered users.
+    """
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+
+
 @api_view(['POST'])
 def like_recipe(request, recipe_id):
     """
@@ -144,44 +161,33 @@ def like_recipe(request, recipe_id):
 
 
 @api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
 def follow_user(request, user_id):
     """
     Follow or unfollow a user.
-    Toggles the follow status for the authenticated user.
     """
-    try:
-        user_to_follow = User.objects.get(id=user_id)
-    except User.DoesNotExist:
-        return Response(
-            {'error': 'User not found'}, 
-            status=status.HTTP_404_NOT_FOUND
-        )
-
+    user_to_follow = get_object_or_404(User, id=user_id)
     follower = request.user
 
-    if Following.objects.filter(
-        follower=follower,
-        following=user_to_follow
-    ).exists():
-        # Unfollow the user if already followed
-        Following.objects.filter(
-            follower=follower,
-            following=user_to_follow
-        ).delete()
-        return Response(
-            {'message': 'Unfollowed user'}, 
-            status=status.HTTP_204_NO_CONTENT
-        )
+    if Following.objects.filter(follower=follower, following=user_to_follow).exists():
+        Following.objects.filter(follower=follower, following=user_to_follow).delete()
+        return Response({'message': 'Unfollowed user'}, status=status.HTTP_204_NO_CONTENT)
     else:
-        # Follow the user if not already followed
-        Following.objects.create(
-            follower=follower,
-            following=user_to_follow
-        )
-        return Response(
-            {'message': 'Followed user'}, 
-            status=status.HTTP_201_CREATED
-        )
+        Following.objects.create(follower=follower, following=user_to_follow)
+        return Response({'message': 'Followed user'}, status=status.HTTP_201_CREATED)
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def check_follow_status(request, user_id):
+    """
+    Check if the logged-in user follows another user.
+    """
+    try:
+        user_to_check = User.objects.get(id=user_id)
+        is_following = Following.objects.filter(follower=request.user, following=user_to_check).exists()
+        return Response({'is_following': is_following}, status=status.HTTP_200_OK)
+    except User.DoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class CustomLoginView(APIView):
@@ -195,7 +201,6 @@ class CustomLoginView(APIView):
         username = request.data.get("username")
         password = request.data.get("password")
 
-        # Authenticate the user
         user = authenticate(request, username=username, password=password)
 
         if user:
@@ -253,45 +258,43 @@ class UserStatusView(APIView):
 
 import traceback 
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import permissions, status
+from .models import Recipe, Like, Comment, Following
+from .serializers import RecipeSerializer, LikeSerializer, CommentSerializer, FollowingSerializer
+
 class FeedView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
         try:
             user = request.user
-
             following_users = Following.objects.filter(follower=user).values_list('following', flat=True)
 
             if not following_users:
                 return Response([], status=status.HTTP_200_OK)
 
-            recipes = Recipe.objects.filter(author__in=following_users).exclude(author=user)
-            likes = Like.objects.filter(user__in=following_users).exclude(user=user)
-            comments = Comment.objects.filter(author__in=following_users).exclude(author=user)
-            follows = Following.objects.filter(follower__in=following_users).exclude(follower=user)
+            recipes = Recipe.objects.filter(author__in=following_users).order_by("-created_at")[:10]
+            likes = Like.objects.filter(user__in=following_users).order_by("-created_at")[:10]
+            comments = Comment.objects.filter(author__in=following_users).order_by("-created_at")[:10]
+            follows = Following.objects.filter(follower=user).order_by("-created_at")[:10]
 
             recipe_data = RecipeSerializer(recipes, many=True, context={'request': request}).data
             like_data = LikeSerializer(likes, many=True, context={'request': request}).data
             comment_data = CommentSerializer(comments, many=True, context={'request': request}).data
             follow_data = FollowingSerializer(follows, many=True, context={'request': request}).data
 
-            # Combine and sort feed
             feed = []
-            for recipe in recipe_data:
-                feed.append({"type": "recipe", "data": recipe})
-            for like in like_data:
-                feed.append({"type": "like", "data": like})
-            for comment in comment_data:
-                feed.append({"type": "comment", "data": comment})
-            for follow in follow_data:
-                feed.append({"type": "follow", "data": follow})
+            feed.extend([{"type": "recipe", "data": r} for r in recipe_data])
+            feed.extend([{"type": "like", "data": l} for l in like_data])
+            feed.extend([{"type": "comment", "data": c} for c in comment_data])
+            feed.extend([{"type": "follow", "data": f} for f in follow_data])
 
-            # Sort by latest
-            feed = sorted(feed, key=lambda x: x["data"].get("created_at", ""), reverse=True)
+            feed = sorted(feed, key=lambda x: x["data"].get("created_at", ""), reverse=True)[:20]
 
             return Response(feed, status=status.HTTP_200_OK)
 
         except Exception as e:
             print("🚨 ERROR in FeedView:", str(e))
-            traceback.print_exc() 
             return Response({"error": "Something went wrong in the feed.", "details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

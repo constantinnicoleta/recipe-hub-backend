@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User 
 from rest_framework import serializers
 from .models import Recipe, Category, Comment, Like, Following
 
@@ -100,3 +101,9 @@ class FeedSerializer(serializers.Serializer):
     type = serializers.CharField()
     created_at = serializers.DateTimeField()
     data = serializers.JSONField()
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "username"]    
