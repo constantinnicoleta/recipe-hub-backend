@@ -2,11 +2,12 @@ from django.urls import path
 from .views import (
     RecipeListCreateView, RecipeDetailView, CategoryListView,
     CommentListCreateView, CommentDetailView,CategoryDetailView, 
-    CustomLoginView, CustomLogoutView,
+    CustomLoginView, CustomLogoutView, FeedView,
     UserStatusView, like_recipe, follow_user
 )
 
 urlpatterns = [
+    path('feed/', FeedView.as_view(), name='user-feed'),
     path('recipes/', RecipeListCreateView.as_view(), name='recipe-list-create'),
     path('recipes/<int:pk>/', RecipeDetailView.as_view(), name='recipe-detail'),
     path('categories/', CategoryListView.as_view(), name='category-list'),

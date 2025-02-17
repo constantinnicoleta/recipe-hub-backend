@@ -77,8 +77,8 @@ class FollowingSerializer(serializers.ModelSerializer):
     Manages unique relationships between followers and followed users.
     Includes validations to prevent duplicate follows.
     """
-    author = serializers.ReadOnlyField(source='author.username')
-    followed_name = serializers.ReadOnlyField(source='followed.username')
+    follower_name = serializers.ReadOnlyField(source='follower.username')
+    following_name = serializers.ReadOnlyField(source='following.username')
 
     def create(self, validated_data):
         # Handles unique constraints for the follower-followed relationship
@@ -90,4 +90,13 @@ class FollowingSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Following
-        fields = ['id', 'author', 'followed', 'followed_name', 'created_at']
+        fields = ['id', 'follower', 'follower_name', 'following', 'following_name', 'created_at']
+
+
+class FeedSerializer(serializers.Serializer):
+    """
+    Serializer to handle feed data, including recipes, likes, comments, and follows.
+    """
+    type = serializers.CharField()
+    created_at = serializers.DateTimeField()
+    data = serializers.JSONField()

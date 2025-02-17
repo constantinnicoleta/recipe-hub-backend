@@ -83,7 +83,7 @@ class CategoryListView(generics.ListAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
-    
+
 
 class CategoryDetailView(generics.RetrieveAPIView):
     """
@@ -249,3 +249,49 @@ class UserStatusView(APIView):
                 },
             }, status=200)
         return Response({"is_logged_in": False}, status=200)
+    
+
+import traceback 
+
+class FeedView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        try:
+            user = request.user
+
+            following_users = Following.objects.filter(follower=user).values_list('following', flat=True)
+
+            if not following_users:
+                return Response([], status=status.HTTP_200_OK)
+
+            recipes = Recipe.objects.filter(author__in=following_users).exclude(author=user)
+            likes = Like.objects.filter(user__in=following_users).exclude(user=user)
+            comments = Comment.objects.filter(author__in=following_users).exclude(author=user)
+            follows = Following.objects.filter(follower__in=following_users).exclude(follower=user)
+
+            recipe_data = RecipeSerializer(recipes, many=True, context={'request': request}).data
+            like_data = LikeSerializer(likes, many=True, context={'request': request}).data
+            comment_data = CommentSerializer(comments, many=True, context={'request': request}).data
+            follow_data = FollowingSerializer(follows, many=True, context={'request': request}).data
+
+            # Combine and sort feed
+            feed = []
+            for recipe in recipe_data:
+                feed.append({"type": "recipe", "data": recipe})
+            for like in like_data:
+                feed.append({"type": "like", "data": like})
+            for comment in comment_data:
+                feed.append({"type": "comment", "data": comment})
+            for follow in follow_data:
+                feed.append({"type": "follow", "data": follow})
+
+            # Sort by latest
+            feed = sorted(feed, key=lambda x: x["data"].get("created_at", ""), reverse=True)
+
+            return Response(feed, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            print("🚨 ERROR in FeedView:", str(e))
+            traceback.print_exc() 
+            return Response({"error": "Something went wrong in the feed.", "details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
