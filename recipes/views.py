@@ -63,6 +63,12 @@ class RecipeDetailView(generics.RetrieveUpdateDestroyAPIView):
     def perform_update(self, serializer):
         serializer.save(author=self.request.user)
 
+    def get_queryset(self):
+        """
+        Ensure the API returns the category name instead of just ID
+        """
+        return Recipe.objects.select_related('category')    
+
 
 class CategoryListView(generics.ListAPIView):
     """

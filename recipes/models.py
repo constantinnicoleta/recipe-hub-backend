@@ -15,7 +15,6 @@ class Recipe(models.Model):
     description = models.TextField()
     ingredients = models.TextField()
     instructions = models.TextField()
-    image = CloudinaryField('image', blank=True, null=True)
     category = models.ForeignKey(
         'Category', on_delete=models.SET_NULL,
         null=True, related_name='recipes')

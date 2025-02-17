@@ -2,41 +2,6 @@ from rest_framework import serializers
 from .models import Recipe, Category, Comment, Like, Following
 
 
-class RecipeSerializer(serializers.ModelSerializer):
-    """
-    Serializer for the Recipe model.
-    Handles author details, ownership check, and validation of images.
-    Includes fields for likes and comments counts.
-    """
-    author = serializers.ReadOnlyField(source='author.username')
-    is_author = serializers.SerializerMethodField()
-    likes_count = serializers.ReadOnlyField()
-    comments_count = serializers.ReadOnlyField()
-
-    def validate_image(self, value):
-        if not value:
-            return value
-        if value.size > 2 * 1024 * 1024:
-            raise serializers.ValidationError("Image size larger than 2MB!")
-        if value.image.height > 4096 or value.image.width > 4096:
-            raise serializers.ValidationError(
-             "Image dimensions exceed 4096x4096px!")
-        return value
-
-    def get_is_author(self, obj):
-        # Checks if the current user is the author of the recipe
-        request = self.context.get('request')
-        return request.user == obj.author
-
-    class Meta:
-        model = Recipe
-        fields = [
-            'id', 'author', 'title', 'description', 'ingredients',
-            'instructions', 'image', 'created_at', 'updated_at',
-            'is_author', 'likes_count', 'comments_count',
-        ]
-
-
 class CategorySerializer(serializers.ModelSerializer):
     """
     Serializer for the Category model.
@@ -45,6 +10,32 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ['id', 'name']
+
+class RecipeSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the Recipe model.
+    Handles author details, ownership check,
+    and includes fields for likes and comments counts.
+    """
+    author = serializers.ReadOnlyField(source='author.username')
+    is_author = serializers.SerializerMethodField()
+    likes_count = serializers.ReadOnlyField()
+    comments_count = serializers.ReadOnlyField()
+    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), write_only=True)
+    category_name = serializers.ReadOnlyField(source="category.name") 
+
+    def get_is_author(self, obj):
+        request = self.context.get('request')
+        return request.user == obj.author
+
+    class Meta:
+        model = Recipe
+        fields = [
+            'id', 'author', 'title', 'description', 'ingredients',
+            'instructions', 'category', 'created_at', 'updated_at',
+            'is_author', 'likes_count','category_name', 'comments_count',
+        ]
+
 
 
 class CommentSerializer(serializers.ModelSerializer):
