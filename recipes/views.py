@@ -28,13 +28,18 @@ class RecipeListCreateView(generics.ListCreateAPIView):
     def get_queryset(self):
         """
         If an `author` parameter is provided, filter recipes by author.
+        If a `category_name` parameter is provided, filter recipes by category name.
         Otherwise, return all recipes.
         """
-        queryset = Recipe.objects.all()
+        queryset = Recipe.objects.select_related('category')  # Optimized query
         author = self.request.query_params.get('author')
+        category_name = self.request.query_params.get('category_name')
 
         if author:
             queryset = queryset.filter(author__username=author)
+
+        if category_name:
+            queryset = queryset.filter(category__name=category_name)  # Filtering by category name
 
         return queryset
 
@@ -78,6 +83,15 @@ class CategoryListView(generics.ListAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+    
+
+class CategoryDetailView(generics.RetrieveAPIView):
+    """
+    Retrieve a single category by ID.
+    """
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [permissions.AllowAny]    
 
 
 class CommentListCreateView(generics.ListCreateAPIView):
